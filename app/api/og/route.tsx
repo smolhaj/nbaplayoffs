@@ -376,7 +376,6 @@ function MatchupBox({
         borderRadius: 8,
         padding: 6,
         gap: 3,
-        minWidth: large ? 180 : undefined,
       }}
     >
       <TeamRow teamId={matchup.home?.teamId} seed={matchup.home?.seed} selected={pick === matchup.home?.teamId} large={large} />
