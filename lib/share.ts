@@ -96,13 +96,15 @@ export async function shareBracket(code: string): Promise<ShareResult> {
   }
 
   // Attempt 3: copy link to clipboard
-  try {
-    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+  const hasModernClipboard = typeof navigator !== "undefined" && navigator.clipboard?.writeText;
+
+  if (hasModernClipboard) {
+    try {
       await navigator.clipboard.writeText(url);
       return { ok: true, method: "clipboard", message: "Link copied to clipboard" };
+    } catch {
+      // fall through to legacy fallback below
     }
-  } catch {
-    // fall through
   }
 
   // Attempt 4 (last resort): legacy document.execCommand copy
