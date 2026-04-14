@@ -76,12 +76,9 @@ export async function shareBracket(code: string): Promise<ShareResult> {
 
     try {
       if (canShareWithFile && file) {
-        if (isIOS()) {
-          // iOS quirk: don't combine files with text/url, it fails silently.
-          await nav.share({ files: [file] });
-        } else {
-          await nav.share({ files: [file], title, text, url });
-        }
+        // Share file only (don't include text/url). On macOS, including both causes
+        // the clipboard to receive duplicate content when the user clicks "Copy".
+        await nav.share({ files: [file] });
         return { ok: true, method: "native-files" };
       }
 
