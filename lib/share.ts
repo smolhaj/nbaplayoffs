@@ -28,18 +28,18 @@ export function isIOS(): boolean {
  * Build an absolute share URL from a state code.
  */
 export function shareUrl(code: string): string {
+  // Use explicit site URL if set (for consistent sharing across domains/redirects).
+  // Otherwise fall back to current window location.
   const origin =
-    typeof window !== "undefined" && window.location?.origin
-      ? window.location.origin
-      : "";
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" && window.location?.origin ? window.location.origin : "");
   return `${origin}/b/${encodeURIComponent(code)}`;
 }
 
 export function ogImageUrl(code: string, download = false): string {
   const origin =
-    typeof window !== "undefined" && window.location?.origin
-      ? window.location.origin
-      : "";
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" && window.location?.origin ? window.location.origin : "");
   const params = new URLSearchParams({ code });
   if (download) params.set("download", "1");
   return `${origin}/api/og?${params.toString()}`;
