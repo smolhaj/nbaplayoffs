@@ -55,50 +55,51 @@ export async function shareBracket(code: string): Promise<ShareResult> {
   const title = "NBA 26 Pick'Em";
   const text = "My 2026 NBA playoff picks — make your own:";
 
-  // Attempt 1: native share with image file (Web Share API Level 2)
-  // We have to fetch the image first, then call share. To preserve user
-  // activation, do this as quickly as possible in the same task.
-  try {
-    if (typeof navigator !== "undefined" && "share" in navigator) {
-      const file = await fetchOgAsFile(code);
-      if (file && "canShare" in navigator && navigator.canShare!({ files: [file] })) {
-        try {
-          if (isIOS()) {
-            // iOS quirk: don't combine files with text/url, it fails silently.
-            await navigator.share({ files: [file] });
-          } else {
-            await navigator.share({ files: [file], title, text, url });
-          }
-          return { ok: true, method: "native-files" };
-        } catch (err) {
-          // AbortError = user cancelled; not a failure worth falling back from.
-          if ((err as DOMException)?.name === "AbortError") {
-            return { ok: false, method: "failed", message: "cancelled" };
-          }
-          // Otherwise fall through to link share.
-        }
+  // Native Web Share API. Once we call navigator.share() we MUST NOT call it
+  // again — even on failure — because the user may have already completed the
+  // share (sent a message) before the promise rejected. Calling share twice is
+  // what produces the "double send" bug.
+  const nav: Navigator | undefined =
+    typeof navigator !== "undefined" ? navigator : undefined;
+  if (nav && typeof nav.share === "function") {
+    // Try to include an image file if the platform supports it. We probe with
+    // canShare() first so that file-incapable browsers don't throw.
+    const file = await fetchOgAsFile(code);
+    let canShareWithFile = false;
+    if (file && typeof nav.canShare === "function") {
+      try {
+        canShareWithFile = nav.canShare({ files: [file] });
+      } catch {
+        canShareWithFile = false;
       }
     }
-  } catch {
-    // ignore, keep falling back
-  }
 
-  // Attempt 2: native share with just the link
-  try {
-    if (typeof navigator !== "undefined" && "share" in navigator) {
-      await navigator.share({ title, text, url });
+    try {
+      if (canShareWithFile && file) {
+        if (isIOS()) {
+          // iOS quirk: don't combine files with text/url, it fails silently.
+          await nav.share({ files: [file] });
+        } else {
+          await nav.share({ files: [file], title, text, url });
+        }
+        return { ok: true, method: "native-files" };
+      }
+
+      // File sharing isn't available — share just the link instead.
+      await nav.share({ title, text, url });
       return { ok: true, method: "native-link" };
-    }
-  } catch (err) {
-    if ((err as DOMException)?.name === "AbortError") {
-      return { ok: false, method: "failed", message: "cancelled" };
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") {
+        return { ok: false, method: "failed", message: "cancelled" };
+      }
+      // The share sheet was shown; do NOT fall through to another share or
+      // the user will be prompted to share twice (and may send twice).
+      return { ok: false, method: "failed", message: "Share failed" };
     }
   }
 
   // Attempt 3: copy link to clipboard
-  const hasModernClipboard = typeof navigator !== "undefined" && navigator.clipboard?.writeText;
-
-  if (hasModernClipboard) {
+  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
     try {
       await navigator.clipboard.writeText(url);
       return { ok: true, method: "clipboard", message: "Link copied to clipboard" };
