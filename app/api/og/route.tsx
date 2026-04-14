@@ -244,7 +244,7 @@ function RoundColumn({
           fontWeight: 800,
           letterSpacing: "0.1em",
           color: MUTED,
-          justifyContent: reverseTextAlign ? "flex-end" : "flex-start",
+          justifyContent: "center",
         }}
       >
         {label}
@@ -293,7 +293,7 @@ function FinalsColumn({
       <div style={{ display: "flex", fontSize: 12, fontWeight: 800, letterSpacing: "0.12em", color: MUTED }}>
         NBA FINALS
       </div>
-      <MatchupBox matchup={finalsMatch} picks={picks} large />
+      <MatchupBox matchup={finalsMatch} picks={picks} large={true} />
       {champion ? (
         <div
           style={{
