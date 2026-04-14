@@ -50,23 +50,7 @@ export function ogImageUrl(code: string, download = false): string {
  * await anything BEFORE calling this function, or iOS will reject the share
  * with "user gesture required".
  */
-let shareInProgress = false;
-
 export async function shareBracket(code: string): Promise<ShareResult> {
-  // Prevent concurrent share calls that could result in duplicate content.
-  if (shareInProgress) {
-    return { ok: false, method: "failed", message: "Share in progress" };
-  }
-  shareInProgress = true;
-
-  try {
-    return await shareBracketImpl(code);
-  } finally {
-    shareInProgress = false;
-  }
-}
-
-async function shareBracketImpl(code: string): Promise<ShareResult> {
   const url = shareUrl(code);
   const title = "NBA 26 Pick'Em";
   const text = "My 2026 NBA playoff picks — make your own:";
