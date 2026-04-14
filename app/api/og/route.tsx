@@ -293,7 +293,35 @@ function FinalsColumn({
       <div style={{ display: "flex", fontSize: 12, fontWeight: 800, letterSpacing: "0.12em", color: MUTED }}>
         NBA FINALS
       </div>
-      <MatchupBox matchup={finalsMatch} picks={picks} large={true} />
+      {/* Finals matchup with explicit team names */}
+      <div style={{ display: "flex", flexDirection: "column", background: "#ffffff", border: `1px solid ${BORDER}`, borderRadius: 8, padding: 6, gap: 3, minWidth: 200 }}>
+        {finalsMatch.home && (
+          <div style={{ display: "flex", alignItems: "center", height: 38, background: picks[finalsMatch.id] === finalsMatch.home.teamId ? getTeam(finalsMatch.home.teamId).primary : "#ffffff", color: picks[finalsMatch.id] === finalsMatch.home.teamId ? "#ffffff" : "#111111", borderRadius: 6, paddingLeft: 4, paddingRight: 8, gap: 6 }}>
+            <div style={{ display: "flex", width: 26, height: 26, borderRadius: "50%", background: getTeam(finalsMatch.home.teamId).primary, border: `2px solid ${getTeam(finalsMatch.home.teamId).secondary}`, alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, flexShrink: 0 }}>
+              {getTeam(finalsMatch.home.teamId).id}
+            </div>
+            <div style={{ display: "flex", fontSize: 14, opacity: 0.7, width: 14 }}>
+              {finalsMatch.home.seed}
+            </div>
+            <div style={{ display: "flex", fontSize: 16, fontWeight: 700 }}>
+              {getTeam(finalsMatch.home.teamId).name}
+            </div>
+          </div>
+        )}
+        {finalsMatch.away && (
+          <div style={{ display: "flex", alignItems: "center", height: 38, background: picks[finalsMatch.id] === finalsMatch.away.teamId ? getTeam(finalsMatch.away.teamId).primary : "#ffffff", color: picks[finalsMatch.id] === finalsMatch.away.teamId ? "#ffffff" : "#111111", borderRadius: 6, paddingLeft: 4, paddingRight: 8, gap: 6 }}>
+            <div style={{ display: "flex", width: 26, height: 26, borderRadius: "50%", background: getTeam(finalsMatch.away.teamId).primary, border: `2px solid ${getTeam(finalsMatch.away.teamId).secondary}`, alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, flexShrink: 0 }}>
+              {getTeam(finalsMatch.away.teamId).id}
+            </div>
+            <div style={{ display: "flex", fontSize: 14, opacity: 0.7, width: 14 }}>
+              {finalsMatch.away.seed}
+            </div>
+            <div style={{ display: "flex", fontSize: 16, fontWeight: 700 }}>
+              {getTeam(finalsMatch.away.teamId).name}
+            </div>
+          </div>
+        )}
+      </div>
       {champion ? (
         <div
           style={{
